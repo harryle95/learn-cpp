@@ -104,6 +104,79 @@ Only has two use cases:
 - Optional prefix specifiers (e.g `auto`, `static`).
 - Base type (`vector<double>`, `const int`)
 - Declarator optionally including a name
+    - `*`: prefix - pointer to base type
+    - `* const`: prefix - constant pointer 
+    - `* volatile`: prefix - volatile pointer 
+    - `&`: prefix - lvalue reference to base type 
+    - `&&`: prefix - rvalue reference to base type 
+    - `auto`: prefix - function using suffix return type 
+    - `[]`: postfix - array
+    - `()`: postfix - function 
+    - `->`: postfix - return from function 
 - Optional suffix function specifiers (`const`, `noexcept`)
 - Optional initialiser or function body. 
 
+## Scope: 
+
+- `Local`: a name declared in a function or lambda. Scope from its point of declaration to the end of block in which its declaration occurs. 
+- `Class`: class member name declared inside a class outside of any function, class, enum, or other namespace. Its scope extends from the opening `{` to the closing `}` of class declaration.
+- `Namespace`: defined in a namespace outside of any function, class, enum or other namespaces. Its scope extends from declaration to the end of its namespace. 
+- `Global`: defined outside of any function, class, enum class or namespace. The scope extends from its point of declaration to the end of file in which its declaration occurs. 
+- `Statement`: defined within the `()` part of a `for`, `while`, `if` or `switch`. Its scope extends from the point of its declaration to the end of the statement. 
+- `Function`: a label is in scope from its point of declaration until the end of function. 
+
+Name shadowing - a declaration of a name in an enclosed scope can hide the same name contained in an enclosing scope. This means a name can be redefined to a different entity within a block. After exiting the block, the name resumes its previous meaning.
+
+Hiden global name can be referenced using the scope resolution operator `::`. 
+
+## Initialisation 
+
+- Uniform initialisation is generally preferred over = initialisation: 
+    - Does not allow type narrowing - i.e. it forbids
+        - float to double 
+        - int to char 
+        - float to int 
+        - int to float 
+- Using `auto` allows a variable type to be infered from its initialisation value. 
+- Auto initialisation should avoid uniform initialisation unless declared type is a list - i.e. when declare a variable with `auto` type, use `=` instead.
+- Most types have a default value: 
+    - Integral types - 0 
+    - Pointer - nullptr
+    - User-defined - default constructor 
+
+## Missing initialiser
+
+- For many types, it is possible to leave out initialiser.
+- The only time it makes sense is when creating a large input buffer. 
+- If no initialiser is specified, a global/namespace/local static/static member is initialised to `{}` of the appropriate type. 
+- Local or dynamic objects are not initialised by default unless they are user-defined types with a default constructor. 
+- Initialisation of built in or local variables or dynamic built in can be done with `{}`. 
+
+## Initialiser list 
+
+- Complicated objects may require more than one value as initialiser - usually best handled with `{}`. For instance: 
+- Initialised using constructor - explicitly using `(param1, param2, ...)`.
+- Note that empty `()` is treated as function declaration.
+- Hence for default construction of object, use `{}`. 
+
+## LValues and RValue 
+
+There are two properties that matter for an object when it comes to addressing, copying and moving:
+- Has identity: whether the program has a name of, pointer to, or reference to the object so that it is possible to determine if two objects are the same.
+- Is movable: whether we are allowed to move the value from one address to another, leaving the object in a valid but unspecified state. 
+
+Combinations: 
+ 
+- i: glvalue 
+- i & !m: lvalue
+- !i && m: prvalue 
+- m: rvalue 
+- i & m: xvalue 
+
+## Object lifetime
+
+- `Automatic`: unless otherwise specified, a function-scoped object is destroyed when its name goes out of scope. Automatic object is allocated on the stack. 
+- `Static`: has a single address for the object through out its life time - created once at initialisation and goes out of scope when the program terminates. 
+- `Free store`: also dynamic - i.e. allocated using new and delete. The lifetime of dynamic objects is controlled by its users. 
+- `Temporary`: intermediate result of a computation or an object used to hold a value for a reference to a const argument: lifetime is determined by their use. If bound to a reference, lifetime is that of the reference. Otherwise, live until the end of the full expression they are part of. 
+- `Thread local`: life time is bounded to life time of the thread which creates the variable. 
