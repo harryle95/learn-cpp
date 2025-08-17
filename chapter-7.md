@@ -10,8 +10,8 @@ Note that pointer addressing mechanism maps to the addressing mechanism of the u
 int *pi; // pointer to an integer 
 char** pc; // pointer to pointer to character 
 int *ap[15]; // array of pointers to int with 15 members 
-int (*fp)(char*) // pointer to a function that takes char* as input and returns an int 
-int* f(char*) // function that takes a char* argument and returns an int*
+int (*fp)(char*); // pointer to a function that takes char* as input and returns an int 
+int* f(char*); // function that takes a char* argument and returns an int*
 ```
 ## Void pointer 
 
@@ -29,7 +29,7 @@ The literal `nullptr` is a pointer that does not point to any object. `nullptr` 
 For a type `T`, `T[size]` is array of size elements of type T. Indexed from `0` to `size - 1`. 
 
 - Accessing out of range is undefined behaviour. Run-time range check is not guaranteed. 
-- The number of elements  in the array must be a `constexpr` - i.e must be known at compile time. 
+- The number of elements  in the array must be a compile time constant - i.e must be known at compile time. 
 - Can be allocated on the stack or on free store. 
 
 Note that: 
@@ -62,7 +62,7 @@ name[0] = 'M'; // error - assignment to const
 
 - To avoid this - i.e to modify the string, assign to a non const character array instead: 
 ```C++
-char[] name = "Harry";
+char name[] = "Harry";
 name[0] = 'M'; // OK
 ```
 - A string literal is statically allocated (not on the stack or the heap). Hence safe to return from a function. Note the return type of the function below.
@@ -95,13 +95,13 @@ char longString[] = "This is a very long string that goes into another line";
 - This can become unmanagable so C++ provides raw string syntax for convenience.
 - `R"(CCC)"` to represent the sequence of characters `CCC`.
 ```C++
-char[] myString = R"("quoted string")"; // value is "quoted string"
+char myString[] = R"("quoted string")"; // value is "quoted string"
 ```
 
 ## Pointers into array 
 
 - Array variable automatically degenerates to pointer to the first element in the array.
-- Setting the pointer beyond the end of an array is a valid operation. 
+- Setting the pointer one element beyond the end of an array is a valid operation. 
 - Dereferencing pointer pointing outside of the array is undefined behaviour. 
 - The implicit conversion from array to pointer means the size of the array is LOST in the conversion. 
 - The integer value of `p` of type `T*` will be `sizeof(T)` less than the integer value of `p + 1`.
@@ -195,7 +195,7 @@ public:
     void push_back(const T& a){...} // pass reference to element to be added 
 };
 
-void f(const vector<double>& v){
+void f(vector<double>& v){
     double d1 = v[1]; // copy the value of the double referred to by v.operator[](1) to d1 
     v[2] = 7; // place 7 in the double referred to by v.operator[](2)
     v.push_back(d1); // pass reference to d1 to v.push_back
@@ -325,7 +325,7 @@ string&& r4{var}; // Error - binds lvalue to rvalue ref
 string && r5{f()}; //OK
 string && r6{"Cambridge"}; //OK
 
-const string cr1& {"Cambridge"}; // OK - temporary and bind 
+const string& cr1 {"Cambridge"}; // OK - temporary and bind 
 ```
 - There is no `const T &&`. Most of the benefits of rvalue references are through modifying and moving the referenced temporary object. 
 - Both `const T&` and `T&&` can bind to a temporary object. 
@@ -359,7 +359,7 @@ The result of `static_cast<T&&>(x)` is an `rvalue` of type `T&&` for `x`. An ope
 template<class T>
 class vector{
     vector (const vector& r); //copy constructor 
-    vector (const vector&& r); // move constructor 
+    vector (vector&& r); // move constructor 
 }
 
 vector<string> s; 
@@ -394,7 +394,7 @@ template<class T> void swap(T&& a, T& b);
 ```C++
 int x, y;
 string& a1[] = {x, y}; // Error - array of reference
-string& a2[] = {&x, &y}; // OK
+string* a2[] = {&x, &y}; // OK
 vector<string&> v1 = {x, y}; // Error - vector of reference
 vector<string*> v2 = {&x, &y}; // OK
 ```
